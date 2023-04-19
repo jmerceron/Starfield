@@ -7,7 +7,7 @@ static Uint8 fire[SCREEN_WIDTH * SCREEN_HEIGHT];
 static SDL_Color colors[256];
 
 
-void fn_vDemoScene_Fire_init()
+void fn_vDemoScene_ColorPalette_Fire_init()
 {
     int i;
 
@@ -114,7 +114,7 @@ void fn_vDemoScene_Fire_Render(SDL_Renderer* renderer)
         {
             //            SDL_Rect FirePixelRect = { j, i, 3, 3 };
             SDL_Rect FirePixelRect = { game_screen_width - 3 * j,
-                                        game_screen_height + i - (SCREEN_HEIGHT - 1),
+                                        game_screen_height + i - (SCREEN_HEIGHT),
                                         3, 3 };
             SDL_SetRenderDrawColor(renderer, colors[fire[i * SCREEN_WIDTH + j]].r,
                 colors[fire[i * SCREEN_WIDTH + j]].g,

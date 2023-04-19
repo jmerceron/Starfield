@@ -45,6 +45,10 @@ add_comments
 #include <windows.h>
 #include <vector>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
 
 
 // Screen dimensions (as percentages of the actual screen dimensions)
@@ -64,6 +68,126 @@ int game_screen_height;
 
 
 
+static Uint16 pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0, tpos1, tpos2, tpos3, tpos4;
+static int aSin[512];
+static SDL_Color colors_plasma[256];
+
+
+void fn_vDemoScene_ColorPalette_Plasma_init()
+{
+    int i;
+    float rad;
+
+    /*create sin lookup table */
+    for (i = 0; i < 512; i++)
+    {
+        rad = ((float)i * 0.703125) * 0.0174532; /* 360 / 512 * degree to rad, 360 degrees spread over 512 values to be able to use AND 512-1 instead of using modulo 360*/
+        aSin[i] = sin(rad) * 1024; /*using fixed point math with 1024 as base*/
+    }
+
+    /* create palette */
+    for (i = 0; i < 64; ++i)
+    {
+        colors_plasma[i].r = i << 2;
+        colors_plasma[i].g = 255 - ((i << 2) + 1);
+        colors_plasma[i + 64].r = 255;
+        colors_plasma[i + 64].g = (i << 2) + 1;
+        colors_plasma[i + 128].r = 255 - ((i << 2) + 1);
+        colors_plasma[i + 128].g = 255 - ((i << 2) + 1);
+        colors_plasma[i + 192].g = (i << 2) + 1;
+    }
+}
+
+
+
+void fn_vDemoScene_Plasma_Render(SDL_Window* window, SDL_Renderer* renderer)
+{
+    SDL_Surface* surface = SDL_GetWindowSurface(window);
+    if (surface == NULL)
+    {
+        std::cout << "Surface could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+
+#if 0
+ 
+    SDL_UpdateWindowSurface(window);
+    
+    /* This is fast for surfaces that don't require locking. */
+    /* Once locked, surface->pixels is safe to access. */
+    SDL_LockSurface(surface);
+
+    /* This assumes that color value zero is black. Use
+        SDL_MapRGBA() for more robust surface color mapping! */
+        /* height times pitch is the size of the surface's whole buffer. */
+    SDL_memset(surface->pixels, 1, surface->h * surface->pitch);
+
+    SDL_UnlockSurface(surface);
+
+#else if
+    Uint8* image;
+    Uint16 i, j;
+    Uint8 index;
+    int x;
+
+    /* Lock the screen for direct access to the pixels */
+//    SDL_UpdateWindowSurface(window);
+    SDL_LockSurface(surface);
+//    SDL_memset(surface->pixels, 255, surface->h * surface->pitch);
+
+    /*this is where it all happens */
+
+    /* draw plasma */
+
+    tpos4 = pos4;
+    tpos3 = pos3;
+
+    image = (Uint8 *)surface->pixels;
+
+    for (i = 0; i < surface->h; ++i)
+    {
+        tpos1 = pos1 + 5;
+        tpos2 = pos2 + 3;
+
+        tpos3 &= 511;
+        tpos4 &= 511;
+
+        for (j = 0; j < surface->w; ++j)
+        {
+            tpos1 &= 511;
+            tpos2 &= 511;
+
+            x = aSin[tpos1] + aSin[tpos2] + aSin[tpos3] + aSin[tpos4]; /*actual plasma calculation*/
+
+            index = 128 + (x >> 4); /*fixed point multiplication but optimized so basically it says (x * (64 * 1024) / (1024 * 1024)), x is already multiplied by 1024*/
+
+//            *image++ = index;
+/*
+            SDL_Rect PlasmaPixelRect = { j,
+                                            i,
+                                        1, 1 };
+            SDL_SetRenderDrawColor(renderer, index,
+                                                index,
+                                                index, 255);
+            SDL_RenderFillRect(renderer, &PlasmaPixelRect);
+*/
+            tpos1 += 5;
+            tpos2 += 3;
+        }
+
+        tpos4 += 3;
+        tpos3 += 1;
+    }
+
+    /* move plasma */
+
+    pos1 += 9;
+    pos3 += 8;
+
+    SDL_UnlockSurface(surface);
+#endif
+}
 
 
 
@@ -107,7 +231,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     game_screen_height = screen_height * SCREEN_HEIGHT_PERCENT / 100;
 
     // Create the window
-    SDL_Window* window = SDL_CreateWindow("Space Invaders", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, game_screen_width, game_screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("Starfield", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, game_screen_width, game_screen_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL)
     {
         std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
@@ -128,8 +252,11 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     // starfield
     generateStars();
 
-    // fire effect
-    fn_vDemoScene_Fire_init();
+    // Fire Color Palette
+    fn_vDemoScene_ColorPalette_Fire_init();
+
+    // Plasma Color Palette
+    fn_vDemoScene_ColorPalette_Plasma_init();
 
     // Set the frame rate
     const int FPS = 60;
@@ -247,6 +374,31 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
                     }
                 }
             }
+            else if (event.type == SDL_MOUSEBUTTONDOWN)
+            {
+                // Handle mouse input
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY); // Get the mouse position
+
+                // create missile to the mouse position
+                int iFirstAvailableSlot = 0;
+                for (int i = 0; i < nbPlayerBullets; i++)
+                {
+                    if (mPlayerBullet[i].active == 0)
+                    {
+                        iFirstAvailableSlot = i;
+                        break;
+                    }
+                }
+                int i = iFirstAvailableSlot;
+                mPlayerBullet[i].active = 1;
+                mPlayerBullet[i].x = mouseX;
+                mPlayerBullet[i].y = mouseY;
+                mPlayerBullet[i].width = game_screen_width / 96;
+                mPlayerBullet[i].height = game_screen_height / 48;
+                mPlayerBullet[i].velocity_x = 0;
+                mPlayerBullet[i].velocity_y = -5;
+            }
         }
 
         // Update game state
@@ -293,6 +445,9 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 
         // fire effect
         fn_vDemoScene_Fire_Render(renderer);
+
+        // plasma effect
+        fn_vDemoScene_Plasma_Render(window, renderer);
 
         // Draw the player
         SDL_Rect playerRect = { mPlayer.x, mPlayer.y, mPlayer.width, mPlayer.height };
