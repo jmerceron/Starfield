@@ -40,10 +40,13 @@ add_comments
 
 #include <iostream>
 #include "sdl.h"
+//#include "SDL_render.h"
 //#include "sdl_image.h"
+#include "sdl_Render_Circle.h"
 #include <windows.h>
 #include <vector>
 
+#define SCROLLING_STARFIELD 1
 
 // Screen dimensions (as percentages of the actual screen dimensions)
 const int SCREEN_WIDTH_PERCENT = 80;
@@ -55,16 +58,22 @@ int game_screen_height;
 const int NUM_STARS = 200;
 const int STAR_SIZE = 2;
 const int MAX_STAR_SPEED = 2;
+const int MAX_STAR_ANGLE = 360;
+const double MAX_STAR_DEPTH = 3.0;
+const double MAX_STAR_DEPTH_SPEED = 0.01;
 
 struct Star {
     int x;
     int y;
-    int speed;
+    double depth;
+    double speed;
+    double angle;
 };
 std::vector<Star> stars;
 
 // Generate random stars
 void generateStars() {
+#if SCROLLING_STARFIELD
     stars.clear();
     std::srand((unsigned int)std::time(0));
     for (int i = 0; i < NUM_STARS; ++i) {
@@ -74,16 +83,50 @@ void generateStars() {
         star.speed = std::rand() % MAX_STAR_SPEED + 1;
         stars.push_back(star);
     }
+#else if
+    stars.clear();
+    std::srand((unsigned int)std::time(0));
+    for (int i = 0; i < NUM_STARS; ++i) {
+        Star star;
+        star.x = std::rand() % game_screen_width;
+        star.y = std::rand() % game_screen_height;
+        star.depth = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX) * MAX_STAR_DEPTH;
+        star.speed = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX) * MAX_STAR_SPEED + 1;
+        star.angle = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX) * MAX_STAR_ANGLE;
+        stars.push_back(star);
+    }
+#endif
 }
 
 // Update star positions
-void updateStars() {
+void updateStars(float deltaTime) {
+#if SCROLLING_STARFIELD
     for (Star& star : stars) {
         star.y += star.speed;
         if (star.y >= game_screen_height) {
             star.y = 0;
         }
     }
+#else if
+    for (Star& star : stars) {
+        // Update star position based on velocity and deltaTime
+        star.x += star.velocity.x * deltaTime;
+        star.y += star.velocity.y * deltaTime;
+        star.z += star.velocity.z * deltaTime;
+
+        // Wrap stars around screen edges
+        if (star.x < 0) {
+            star.x = game_screen_width;
+        }
+        if (star.y < 0) {
+            star.y = game_screen_height;
+        }
+
+        // Update star size based on depth
+        int starSize = static_cast<int>(STAR_SIZE * (MAX_STAR_DEPTH - star.z + 1));
+        star.size = starSize;
+    }
+#endif
 }
 
 
@@ -499,14 +542,14 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         }
 
         // update the starfield
-        updateStars();
+        updateStars(frameDelay);
 
         // Set the rendering color
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
         // Clear the window
         SDL_RenderClear(renderer);
-
+#if SCROLLING_STARFIELD
         // render starfield
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         for (const Star& star : stars) 
@@ -516,6 +559,21 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             SDL_RenderFillRect(renderer, &starRect);
         }
+#else if
+        // Draw stars
+        for (const Star& star : stars) 
+        {
+            // Calculate star size based on depth
+            int starSize = static_cast<int>(STAR_SIZE * (MAX_STAR_DEPTH - star.depth + 1));
+
+            // Set star color based on depth
+            int color = static_cast<int>((1 - star.depth / MAX_STAR_DEPTH) * 255);
+            SDL_SetRenderDrawColor(renderer, color, color, color, 255);
+
+            // Draw filled circle as star
+            SDL_RenderFillCircle(renderer, star.x, star.y, starSize);
+        }
+#endif
 
         // Draw the player
         SDL_Rect playerRect = { mPlayer.x, mPlayer.y, mPlayer.width, mPlayer.height };
