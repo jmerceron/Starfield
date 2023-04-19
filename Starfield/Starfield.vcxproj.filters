@@ -32,5 +32,8 @@
     <ClInclude Include="player_bullets_invaders.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="FireEffect.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

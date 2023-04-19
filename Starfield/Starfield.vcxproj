@@ -146,6 +146,7 @@
     <ClCompile Include="SDL_Render_Circle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FireEffect.h" />
     <ClInclude Include="player_bullets_invaders.h" />
     <ClInclude Include="SDL_Render_Circle.h" />
     <ClInclude Include="Starfield.h" />

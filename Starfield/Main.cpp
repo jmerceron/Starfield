@@ -40,7 +40,7 @@ add_comments
 
 #include <iostream>
 #include "sdl.h"
-//#include "SDL_render.h"
+#include "SDL_render.h"
 //#include "sdl_image.h"
 #include <windows.h>
 #include <vector>
@@ -48,6 +48,8 @@ add_comments
 
 
 // Screen dimensions (as percentages of the actual screen dimensions)
+#define SCREEN_WIDTH 480
+#define SCREEN_HEIGHT 360
 const int SCREEN_WIDTH_PERCENT = 80;
 const int SCREEN_HEIGHT_PERCENT = 80;
 int screen_width, screen_height;
@@ -58,6 +60,9 @@ int game_screen_height;
 #include "sdl_Render_Circle.h"
 #include "player_bullets_invaders.h"
 #include "starfield.h"
+#include "FireEffect.h"
+
+
 
 
 
@@ -123,6 +128,8 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     // starfield
     generateStars();
 
+    // fire effect
+    fn_vDemoScene_Fire_init();
 
     // Set the frame rate
     const int FPS = 60;
@@ -140,7 +147,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
+            if ((event.type == SDL_QUIT)||(event.key.keysym.sym == SDLK_ESCAPE))
             {
                 running = false;
             }
@@ -283,6 +290,9 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
             SDL_RenderFillCircle(renderer, star.x, star.y, starSize);
         }
 #endif
+
+        // fire effect
+        fn_vDemoScene_Fire_Render(renderer);
 
         // Draw the player
         SDL_Rect playerRect = { mPlayer.x, mPlayer.y, mPlayer.width, mPlayer.height };
