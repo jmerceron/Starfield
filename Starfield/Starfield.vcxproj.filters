@@ -15,15 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Starfield.cpp">
+    <ClCompile Include="SDL_Render_Circle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDL_Render_Circle.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL_Render_Circle.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Starfield.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player_bullets_invaders.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
