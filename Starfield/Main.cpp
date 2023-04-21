@@ -132,9 +132,8 @@ void fn_vDemoScene_Plasma_Render(SDL_Window* window, SDL_Renderer* renderer)
     int x;
 
     /* Lock the screen for direct access to the pixels */
-//    SDL_UpdateWindowSurface(window);
     SDL_LockSurface(surface);
-//    SDL_memset(surface->pixels, 255, surface->h * surface->pitch);
+    SDL_memset(surface->pixels, 255, surface->h * surface->pitch);
 
     /*this is where it all happens */
 
@@ -162,7 +161,7 @@ void fn_vDemoScene_Plasma_Render(SDL_Window* window, SDL_Renderer* renderer)
 
             index = 128 + (x >> 4); /*fixed point multiplication but optimized so basically it says (x * (64 * 1024) / (1024 * 1024)), x is already multiplied by 1024*/
 
-//            *image++ = index;
+            *image++ = index;
 /*
             SDL_Rect PlasmaPixelRect = { j,
                                             i,
@@ -186,6 +185,7 @@ void fn_vDemoScene_Plasma_Render(SDL_Window* window, SDL_Renderer* renderer)
     pos3 += 8;
 
     SDL_UnlockSurface(surface);
+    SDL_UpdateWindowSurface(window);
 #endif
 }
 
@@ -447,7 +447,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         fn_vDemoScene_Fire_Render(renderer);
 
         // plasma effect
-        fn_vDemoScene_Plasma_Render(window, renderer);
+//        fn_vDemoScene_Plasma_Render(window, renderer);
 
         // Draw the player
         SDL_Rect playerRect = { mPlayer.x, mPlayer.y, mPlayer.width, mPlayer.height };
