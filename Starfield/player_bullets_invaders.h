@@ -1,6 +1,41 @@
 #pragma once
 
 
+#define INVADER_DESTRUCTION_MAX_COUNT   10
+#define INVADER_DESTRUCTION_TIMER       60
+
+struct stExplosion_location 
+{
+    int     x, y;
+    int     width, height;
+    int     timer;
+    bool    bActive;
+    bool    bIgnite;
+};
+
+
+stExplosion_location stExplosion_location_Elements[INVADER_DESTRUCTION_MAX_COUNT];
+
+
+int iLast_ResolutionX = SCREEN_WIDTH;
+int iLast_ResolutionY = SCREEN_HEIGHT;
+
+
+
+
+
+///////////////////////////////////////
+// Destruction Functions //////////////
+///////////////////////////////////////
+
+void fn_vDestruction_Init()
+{
+    for (int i = 0; i < INVADER_DESTRUCTION_MAX_COUNT; i++)
+    {
+        stExplosion_location_Elements[i].bActive = 0;
+    }
+}
+
 
 
 
@@ -94,6 +129,24 @@ public:
                     {
                         // If so, mark the block as destroyed
                         destroyed = true;
+                       
+
+                        // add location for explosion FX !!!!!!!!!!!!!!!!!!!!!! TO_DO_LIST
+                        for (int k = 0; k < INVADER_DESTRUCTION_MAX_COUNT; k++)
+                        {
+                            if (!stExplosion_location_Elements[k].bActive)
+                            {
+                                stExplosion_location_Elements[k].bActive = 1;
+                                stExplosion_location_Elements[k].bIgnite = 1;
+                                stExplosion_location_Elements[k].x = x;
+                                stExplosion_location_Elements[k].y = y;
+                                stExplosion_location_Elements[k].width = width;
+                                stExplosion_location_Elements[k].height = height;
+                                break;
+                            }
+                        }
+
+                        
                         // rearrange list of player bullets
                         for (int j = 0; j < nbPlayerBullets; j++)
                         {
@@ -158,6 +211,10 @@ void fn_vInvadersBullets_Update()
 
 void fn_vInitObjectsSizeOnScreen()
 {
+    // init base resolution
+    iLast_ResolutionX = game_screen_width;
+    iLast_ResolutionY = game_screen_height;
+    
     // Create the paddle
     mPlayer.x = game_screen_width / 2;
     mPlayer.y = game_screen_height - game_screen_height / 9;
@@ -193,9 +250,20 @@ void fn_vInitObjectsSizeOnScreen()
 
 void fn_vUpdateObjectsSizeOnScreen()
 {
+
+    // calculate ratio
+    float fRatioX = ((float)game_screen_width / (float)iLast_ResolutionX);
+    float fRatioY = ((float)game_screen_height / (float)iLast_ResolutionY);
+
+
+    // update last resolution
+    iLast_ResolutionX = game_screen_width;
+    iLast_ResolutionY = game_screen_height;
+
+
     // update the Paddle size on screen
-    mPlayer.x = game_screen_width / 2;
-    mPlayer.y = game_screen_height - game_screen_height / 9;
+    mPlayer.x = (int)(mPlayer.x * fRatioX);
+    mPlayer.y = (int)(mPlayer.y * fRatioY);
     mPlayer.width = game_screen_width / 12;
     mPlayer.height = game_screen_height / 24;
     //mPlayer.velocity = 0;
@@ -203,9 +271,9 @@ void fn_vUpdateObjectsSizeOnScreen()
     // update the Player Bullets
     for (int i = 0; i < nbPlayerBullets; i++)
     {
-        //        mPlayerBullet[i].active = 0;
-        mPlayerBullet[i].x = game_screen_width / 2;
-        mPlayerBullet[i].y = game_screen_height - game_screen_height / 9;
+//        mPlayerBullet[i].active = 0;
+        mPlayerBullet[i].x = (int)(mPlayerBullet[i].x * fRatioX);
+        mPlayerBullet[i].y = (int)(mPlayerBullet[i].y * fRatioY);
         mPlayerBullet[i].width = game_screen_width / 96;
         mPlayerBullet[i].height = game_screen_height / 48;
         mPlayerBullet[i].velocity_x = 0;
@@ -224,3 +292,79 @@ void fn_vUpdateObjectsSizeOnScreen()
         }
     }
 }
+
+
+
+void fn_vUpdateBullets_spawn5()
+{
+    int iFirstAvailableSlot = 0;
+    for (int i = 0; i < nbPlayerBullets; i++)
+    {
+        if (mPlayerBullet[i].active == 0)
+        {
+            iFirstAvailableSlot = i;
+            break;
+        }
+    }
+    int i = iFirstAvailableSlot;
+    mPlayerBullet[i].active = 1;
+    mPlayerBullet[i].x = mPlayer.x + mPlayer.width / 2;
+    mPlayerBullet[i].y = mPlayer.y;
+    mPlayerBullet[i].width = game_screen_width / 96;
+    mPlayerBullet[i].height = game_screen_height / 48;
+    mPlayerBullet[i].velocity_x = 0;
+    mPlayerBullet[i].velocity_y = -5;
+    mPlayerBullet[i + 1].active = 1;
+    mPlayerBullet[i + 1].x = mPlayer.width / 2 + mPlayer.x + game_screen_width / 24;
+    mPlayerBullet[i + 1].y = mPlayer.y;
+    mPlayerBullet[i + 1].width = game_screen_width / 96;
+    mPlayerBullet[i + 1].height = game_screen_height / 48;
+    mPlayerBullet[i + 1].velocity_x = 0;
+    mPlayerBullet[i + 1].velocity_y = -5;
+    mPlayerBullet[i + 2].active = 1;
+    mPlayerBullet[i + 2].x = mPlayer.width / 2 + mPlayer.x - game_screen_width / 24;
+    mPlayerBullet[i + 2].y = mPlayer.y;
+    mPlayerBullet[i + 2].width = game_screen_width / 96;
+    mPlayerBullet[i + 2].height = game_screen_height / 48;
+    mPlayerBullet[i + 2].velocity_x = 0;
+    mPlayerBullet[i + 2].velocity_y = -5;
+    mPlayerBullet[i + 3].active = 1;
+    mPlayerBullet[i + 3].x = mPlayer.width / 2 + mPlayer.x + 2 * game_screen_width / 24;
+    mPlayerBullet[i + 3].y = mPlayer.y;
+    mPlayerBullet[i + 3].width = game_screen_width / 96;
+    mPlayerBullet[i + 3].height = game_screen_height / 48;
+    mPlayerBullet[i + 3].velocity_x = 0;
+    mPlayerBullet[i + 3].velocity_y = -5;
+    mPlayerBullet[i + 4].active = 1;
+    mPlayerBullet[i + 4].x = mPlayer.width / 2 + mPlayer.x - 2 * game_screen_width / 24;
+    mPlayerBullet[i + 4].y = mPlayer.y;
+    mPlayerBullet[i + 4].width = game_screen_width / 96;
+    mPlayerBullet[i + 4].height = game_screen_height / 48;
+    mPlayerBullet[i + 4].velocity_x = 0;
+    mPlayerBullet[i + 4].velocity_y = -5;
+}
+
+
+void fn_vUpdateBullets_spawn1(int locationX, int locationY)
+{
+    // create missile to the mouse position
+    int iFirstAvailableSlot = 0;
+    for (int i = 0; i < nbPlayerBullets; i++)
+    {
+        if (mPlayerBullet[i].active == 0)
+        {
+            iFirstAvailableSlot = i;
+            break;
+        }
+    }
+    int i = iFirstAvailableSlot;
+    mPlayerBullet[i].active = 1;
+    mPlayerBullet[i].x = locationX;
+    mPlayerBullet[i].y = locationY;
+    mPlayerBullet[i].width = game_screen_width / 96;
+    mPlayerBullet[i].height = game_screen_height / 48;
+    mPlayerBullet[i].velocity_x = 0;
+    mPlayerBullet[i].velocity_y = -5;
+
+}
+

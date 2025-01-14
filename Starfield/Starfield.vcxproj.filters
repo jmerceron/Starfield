@@ -21,6 +21,24 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SDL_Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player_Actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Plasma_effect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Explosion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="conversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextOnScreen_Display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL_Render_Circle.h">
@@ -33,6 +51,24 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="FireEffect.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDL_Controller.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player_Actions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Plasma_effect.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Explosion.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="conversion.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextOnScreen_Display.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
