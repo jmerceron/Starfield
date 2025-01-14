@@ -865,6 +865,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     TTF_Quit();
     SDL_Quit();
 
+
     return 0;
 
 }
