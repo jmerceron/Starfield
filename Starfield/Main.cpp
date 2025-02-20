@@ -51,6 +51,7 @@ add_comments
 #include <string.h>
 
 #include <cstdint>
+#include <omp.h>
 
 #define STARFIELD_DEBUG 0
 #define HELLO_WORLD 0
@@ -744,10 +745,14 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         // Update game state
         mPlayer.update(game_screen_width);
         fn_vPlayerBullets_Update();
-        for (unsigned int i = 0; i < vInvaders.size(); i++)
+
+        int iNb_Threads;
+       #pragma omp parallel for
+        for (int i = 0; i < vInvaders.size(); i++)
         {
             vInvaders[i].update();
         }
+        iNb_Threads = omp_get_max_threads();
 
         // update the starfield
         updateStars(frameDelay);
@@ -796,6 +801,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
 //        SDL_RenderFillRect(renderer, &playerRect);
 
         // Draw the player bullets
+        //#pragma omp parallel for
         for (int i = 0; i < nbPlayerBullets; i++)
         {
             if (mPlayerBullet[i].active == 1)
@@ -807,9 +813,11 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
                 SDL_RenderFillRect(renderer, &ballRect);
             }
         }
+        //iNb_Threads = omp_get_max_threads();
 
         // Draw the invaders
-        for (unsigned int i = 0; i < vInvaders.size(); i++)
+        //#pragma omp parallel for
+        for (int i = 0; i < vInvaders.size(); i++)
         {
             if (!vInvaders[i].destroyed)
             {
@@ -818,6 +826,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
                 SDL_RenderFillRect(renderer, &blockRect);
             }
         }
+        //iNb_Threads = omp_get_max_threads();
 
         // Draw the explosions
         for (int i = 0; i < INVADER_DESTRUCTION_MAX_COUNT; i++)
