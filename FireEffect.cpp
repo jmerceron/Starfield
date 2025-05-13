@@ -1,0 +1,1 @@
+# Content of FireEffect.cpp
